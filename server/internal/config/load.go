@@ -1,13 +1,49 @@
 package config
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
 
-func Load() {
+type Config struct {
+	Port        string
+	DatabaseUrl string
+}
+
+func getPort() string {
+	port := os.Getenv("HTTP_PORT")
+	_, err := strconv.Atoi(port)
+	if err != nil {
+		log.Fatalf("HTTP_PORT is not a int: %v\n", err)
+	}
+
+	return port
+}
+
+func getDatabaseUrl() string {
+	dbUrl := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("DATABASE_HOST"),
+		"5433",
+		os.Getenv("DATABASE_USER"),
+		os.Getenv("DATABASE_PASSWORD"),
+		os.Getenv("DATABASE_NAME"),
+	)
+
+	return dbUrl
+}
+
+func Load() *Config {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file: %v\n", err)
+		log.Fatalf("Error loading .env file: %v\n", err)
+	}
+
+	return &Config{
+		Port:        getPort(),
+		DatabaseUrl: getDatabaseUrl(),
 	}
 }
