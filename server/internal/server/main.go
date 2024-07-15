@@ -4,8 +4,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
 	"github.com/ssr0016/personal-finance/internal/config"
+	"github.com/ssr0016/personal-finance/internal/controller"
 	"github.com/ssr0016/personal-finance/internal/database"
 	"github.com/ssr0016/personal-finance/internal/server/router"
+	"github.com/ssr0016/personal-finance/internal/service"
 )
 
 type Server struct {
@@ -29,7 +31,11 @@ func NewServer(cfg *config.Config) *Server {
 }
 
 func (s *Server) Start() error {
-	s.SetupRoutes()
+	us := service.NewUserService(s.db)
+
+	uc := controller.NewAuthController(us)
+
+	s.SetupRoutes(uc)
 	return s.app.Listen(s.port)
 }
 

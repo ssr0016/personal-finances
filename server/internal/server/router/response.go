@@ -26,6 +26,6 @@ func Ok(ctx *fiber.Ctx, data interface{}) error {
 	return Response(ctx, fiber.StatusOK, data)
 }
 
-func Create(ctx *fiber.Ctx, data interface{}) error {
+func Created(ctx *fiber.Ctx, data interface{}) error {
 	return Response(ctx, fiber.StatusCreated, data)
 }

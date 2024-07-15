@@ -23,13 +23,12 @@ func main() {
 		},
 	}
 	_, err = db.NamedExec(
-		`INSERT INTO users(username, password)
-		 VALUES (:username, :password)`,
+		`insert into users (username, password)
+		 values (:username, :password)`,
 		users,
 	)
 	if err != nil {
 		log.Fatalf("Error inserting users: %v\n", err)
 	}
-
 	log.Printf("Successfully inserted users: %v\n", users)
 }

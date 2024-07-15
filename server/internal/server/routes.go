@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jmoiron/sqlx"
+	"github.com/ssr0016/personal-finance/internal/controller"
 	"github.com/ssr0016/personal-finance/internal/server/router"
 )
 
@@ -21,7 +22,10 @@ func healthCheck(db *sqlx.DB) fiber.Handler {
 	}
 }
 
-func (s *Server) SetupRoutes() {
+func (s *Server) SetupRoutes(uc *controller.AuthController) {
 	api := s.app.Group("/api")
 	api.Get("/", healthCheck(s.db))
+
+	api.Post("/login", uc.Login)
+	api.Post("/register", uc.Register)
 }

@@ -3,9 +3,9 @@ package model
 import "time"
 
 type User struct {
-	Id        string     `db:"id"`
-	CreateAt  time.Time  `db:"created_at" json:"created_at"`
-	UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
+	Id        string     `json:"id"`
+	CreatedAt time.Time  `db:"created_at" json:"createdAt"`
+	UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
 	Username  string     `json:"username"`
 	Password  string     `json:"-"`
 }
