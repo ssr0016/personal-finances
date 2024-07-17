@@ -25,6 +25,7 @@ func (s *CategoryService) GetById(id string) (*model.Category, error) {
 	err := s.db.Get(&category, "select * from category where id = $1", id)
 	return &category, err
 }
+
 func (s *CategoryService) Create(userId, title string) (*model.Category, error) {
 	rows, err := s.db.Queryx(
 		`insert into category (user_id, title)
@@ -44,11 +45,10 @@ func (s *CategoryService) Create(userId, title string) (*model.Category, error) 
 func (s *CategoryService) Update(id, userId, title string) (*model.Category, error) {
 	rows, err := s.db.Queryx(
 		`update category
-		set title = $2
-		where id = $1
-		and user_id =$3
-		returning *
-		`,
+			  set title = $2
+			where id = $1
+			  and user_id = $3
+	   returning *`,
 		id,
 		title,
 		userId,

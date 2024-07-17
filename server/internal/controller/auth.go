@@ -93,12 +93,10 @@ func (c *AuthController) Me(ctx *fiber.Ctx) error {
 	if err != nil {
 		return response.ErrorUnauthorized(err, "Invalid credentials")
 	}
-
 	token, err := c.createToken(currentUser.Username)
 	if err != nil {
 		return response.ErrorUnauthorized(err, "Invalid credentials")
 	}
-
 	return response.Ok(ctx, fiber.Map{
 		"user":  currentUser,
 		"token": token,

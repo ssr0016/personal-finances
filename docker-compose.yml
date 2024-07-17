@@ -10,3 +10,5 @@ services:
       POSTGRES_DB: finance_db
     volumes:
       - ./sql/:/docker-entrypoint-initdb.d/
+
+#docker exec -it finance_db psql -U postgres -d finance_db

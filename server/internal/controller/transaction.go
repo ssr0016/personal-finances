@@ -8,97 +8,79 @@ import (
 	"github.com/ssr0016/personal-finance/internal/service"
 )
 
-type CategoryController struct {
-	s *service.CategoryService
+type TransactionController struct {
+	s *service.TransactionService
 }
 
-func NewCategoryController(s *service.CategoryService) *CategoryController {
-	return &CategoryController{
+func NewTransactionController(s *service.TransactionService) *TransactionController {
+	return &TransactionController{
 		s: s,
 	}
 }
 
-func (c *CategoryController) List(ctx *fiber.Ctx) error {
-	user := ctx.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	id := claims["sub"].(string)
-	categories, err := c.s.GetAllByUserId(id)
-	if err != nil {
-		return response.ErrorNotFound(err)
-	}
-	return response.Ok(ctx, fiber.Map{
-		"categories": categories,
-	})
-}
-
-func (c *CategoryController) Get(ctx *fiber.Ctx) error {
+func (c *TransactionController) Get(ctx *fiber.Ctx) error {
 	user := ctx.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	userId := claims["sub"].(string)
 	id := ctx.Params("id")
-	category, err := c.s.GetById(id)
+	transaction, err := c.s.GetById(id)
+
 	if err != nil {
 		return response.ErrorNotFound(err)
 	}
-	if category.UserId != userId {
+	if transaction.UserId != userId {
 		return response.ErrorUnauthorized(err, "unauthorized")
 	}
 	return response.Ok(ctx, fiber.Map{
-		"category": category,
+		"transaction": transaction,
 	})
 }
 
-func (c *CategoryController) Create(ctx *fiber.Ctx) error {
+func (c *TransactionController) Create(ctx *fiber.Ctx) error {
 	user := ctx.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	userId := claims["sub"].(string)
-
-	input := model.CategoryInput{}
+	input := model.TransactionInput{}
 	if err := ctx.BodyParser(&input); err != nil {
 		return response.ErrorBadRequest(err)
 	}
-	category, err := c.s.Create(userId, input.Title)
+	transaction, err := c.s.Create(userId, input)
 	if err != nil {
 		return response.ErrorBadRequest(err)
 	}
-
 	return response.Created(ctx, fiber.Map{
-		"category": category,
+		"transaction": transaction,
 	})
 }
-func (c *CategoryController) Update(ctx *fiber.Ctx) error {
+
+func (c *TransactionController) Update(ctx *fiber.Ctx) error {
 	user := ctx.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	userId := claims["sub"].(string)
 	id := ctx.Params("id")
-	input := model.CategoryInput{}
-
+	input := model.TransactionInput{}
 	if err := ctx.BodyParser(&input); err != nil {
 		return response.ErrorBadRequest(err)
 	}
-	category, err := c.s.Update(id, userId, input.Title)
-	if err != nil {
-		return response.ErrorBadRequest(err)
-	}
-	category, err = c.s.Update(id, userId, input.Title)
+	transaction, err := c.s.Update(id, userId, input)
 	if err != nil {
 		return response.ErrorBadRequest(err)
 	}
 	return response.Ok(ctx, fiber.Map{
-		"category": category,
+		"transaction": transaction,
 	})
 }
 
-func (c *CategoryController) Delete(ctx *fiber.Ctx) error {
+func (c *TransactionController) Delete(ctx *fiber.Ctx) error {
 	user := ctx.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	userId := claims["sub"].(string)
 	id := ctx.Params("id")
-	category, err := c.s.Delete(id, userId)
+	transaction, err := c.s.Delete(id, userId)
 	if err != nil {
 		return response.ErrorBadRequest(err)
 	}
 	return response.Ok(ctx, fiber.Map{
-		"category": category,
+		"transaction": transaction,
 	})
 }
