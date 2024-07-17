@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"time"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/ssr0016/personal-finance/internal/model"
 	"github.com/ssr0016/personal-finance/internal/server/router"
 	"github.com/ssr0016/personal-finance/internal/service"
@@ -9,13 +12,26 @@ import (
 )
 
 type AuthController struct {
-	s *service.UserService
+	s      *service.UserService
+	secret string
 }
 
-func NewAuthController(s *service.UserService) *AuthController {
+func NewAuthController(s *service.UserService, secret string) *AuthController {
 	return &AuthController{
-		s: s,
+		s:      s,
+		secret: secret,
 	}
+}
+
+func (c *AuthController) createToken(username string) (string, error) {
+	claims := jwt.MapClaims{
+		"sub": username,
+		"exp": time.Now().Add(time.Hour * 72).Unix(),
+		"iat": time.Now().Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(c.secret))
 }
 
 func (c *AuthController) Register(ctx *fiber.Ctx) error {
@@ -32,8 +48,15 @@ func (c *AuthController) Register(ctx *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusUnauthorized, "registration error")
 	}
+
+	token, err := c.createToken(user.Username)
+	if err != nil {
+		return fiber.NewError(fiber.StatusUnauthorized, "registration error")
+	}
+
 	return router.Created(ctx, fiber.Map{
-		"user": user,
+		"user":  user,
+		"token": token,
 	})
 }
 
@@ -51,7 +74,33 @@ func (c *AuthController) Login(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnauthorized, "invalid username or password")
 	}
 
+	token, err := c.createToken(user.Username)
+	if err != nil {
+		return fiber.NewError(fiber.StatusUnauthorized, "registration error")
+	}
+
 	return router.Ok(ctx, fiber.Map{
-		"user": user,
+		"user":  user,
+		"token": token,
+	})
+}
+
+func (c *AuthController) Me(ctx *fiber.Ctx) error {
+	user := ctx.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	username := claims["sub"].(string)
+	currentUser, err := c.s.GetByUsername(username)
+	if err != nil {
+		return fiber.NewError(fiber.StatusUnauthorized, "invalid token")
+	}
+
+	token, err := c.createToken(currentUser.Username)
+	if err != nil {
+		return fiber.NewError(fiber.StatusUnauthorized, "invalid token")
+	}
+
+	return router.Ok(ctx, fiber.Map{
+		"user":  currentUser,
+		"token": token,
 	})
 }
