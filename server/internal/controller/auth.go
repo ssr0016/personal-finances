@@ -23,9 +23,9 @@ func NewAuthController(s *service.UserService, secret string) *AuthController {
 	}
 }
 
-func (c *AuthController) createToken(username string) (string, error) {
+func (c *AuthController) createToken(id string) (string, error) {
 	claims := jwt.MapClaims{
-		"sub": username,
+		"sub": id,
 		"exp": time.Now().Add(time.Hour * 72).Unix(),
 		"iat": time.Now().Unix(),
 	}
@@ -49,7 +49,7 @@ func (c *AuthController) Register(ctx *fiber.Ctx) error {
 		return response.ErrorUnauthorized(err, "Registration error")
 	}
 
-	token, err := c.createToken(user.Username)
+	token, err := c.createToken(user.Id)
 	if err != nil {
 		return response.ErrorUnauthorized(err, "Registration error")
 	}
@@ -74,7 +74,7 @@ func (c *AuthController) Login(ctx *fiber.Ctx) error {
 		return response.ErrorUnauthorized(err, "Login error")
 	}
 
-	token, err := c.createToken(user.Username)
+	token, err := c.createToken(user.Id)
 	if err != nil {
 		return response.ErrorUnauthorized(err, "Login error")
 	}
@@ -88,8 +88,8 @@ func (c *AuthController) Login(ctx *fiber.Ctx) error {
 func (c *AuthController) Me(ctx *fiber.Ctx) error {
 	user := ctx.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
-	username := claims["sub"].(string)
-	currentUser, err := c.s.GetByUsername(username)
+	id := claims["sub"].(string)
+	currentUser, err := c.s.GetByUsername(id)
 	if err != nil {
 		return response.ErrorUnauthorized(err, "Invalid credentials")
 	}
