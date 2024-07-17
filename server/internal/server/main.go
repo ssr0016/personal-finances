@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/jmoiron/sqlx"
 	"github.com/ssr0016/personal-finance/internal/config"
 	"github.com/ssr0016/personal-finance/internal/controller"
@@ -21,6 +22,8 @@ func NewServer(cfg *config.Config) *Server {
 	app := fiber.New(fiber.Config{
 		ErrorHandler: response.DefaultErrorHandler,
 	})
+
+	app.Use(cors.New())
 
 	port := ":" + cfg.Port
 	db := database.Connect(cfg.DatabaseUrl)

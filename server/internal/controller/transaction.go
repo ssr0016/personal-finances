@@ -18,6 +18,21 @@ func NewTransactionController(s *service.TransactionService) *TransactionControl
 	}
 }
 
+func (c *TransactionController) GetAll(ctx *fiber.Ctx) error {
+	user := ctx.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	userId := claims["sub"].(string)
+	page := ctx.QueryInt("page", 1)
+	pageSize := ctx.QueryInt("page_size", 25)
+	transactions, err := c.s.GetAll(userId, page, pageSize)
+	if err != nil {
+		return response.ErrorNotFound(err)
+	}
+	return response.Ok(ctx, fiber.Map{
+		"transactions": transactions,
+	})
+}
+
 func (c *TransactionController) Get(ctx *fiber.Ctx) error {
 	user := ctx.Locals("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)

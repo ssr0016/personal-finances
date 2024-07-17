@@ -46,6 +46,7 @@ func (s *Server) SetupRoutes(
 	transactions := api.Group("/transaction")
 	transactions.Use(middleware.Authenticate(s.jwtSecret))
 	transactions.Post("/", tc.Create)
+	transactions.Get("/", tc.GetAll)
 	transactions.Get("/:id", tc.Get)
 	transactions.Put("/:id", tc.Update)
 	transactions.Delete("/:id", tc.Delete)
